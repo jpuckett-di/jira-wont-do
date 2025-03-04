@@ -15,7 +15,7 @@ function findIssueKey() {
 }
 
 function makeTimeLogRequestUrl() {
-    return `https://carscommerce.atlassian.net/rest/internal/3/issue/${findIssueKey()}/worklog?adjustEstimate=auto`;
+  return `https://carscommerce.atlassian.net/rest/internal/3/issue/${findIssueKey()}/worklog?adjustEstimate=auto`;
 }
 
 function makeTimeLogJson() {
@@ -44,7 +44,26 @@ function makeTimeLogJson() {
 }
 
 function submitTime() {
-  console.log(makeTimeLogRequestUrl());
+  fetch(makeTimeLogRequestUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json,text/javascript,*/*",
+    },
+    body: makeTimeLogJson(),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Time logged successfully:", data);
+    })
+    .catch((error) => {
+      console.error("Error logging time:", error);
+    });
 }
 
 function createButton() {
