@@ -8,17 +8,31 @@
 // @version 1.0.0
 // @description Automates closing tickets as "Won't Do"
 // ==/UserScript==
+function findIssueKey() {
+  return document.querySelector(
+    'a[data-testid="issue.views.issue-base.foundation.breadcrumbs.current-issue.item"] span'
+  ).innerText;
+}
+
+function makeTimeLogRequestUrl() {
+    return `https://carscommerce.atlassian.net/rest/internal/3/issue/${findIssueKey()}/worklog?adjustEstimate=auto`;
+}
+
 function makeTimeLogJson() {
   const date = new Date();
   // Format the date with timezone offset directly
-  const etOptions = { timeZone: 'America/New_York', hour12: false };
-  const etDate = new Date(date.toLocaleString('en-US', etOptions));
+  const etOptions = { timeZone: "America/New_York", hour12: false };
+  const etDate = new Date(date.toLocaleString("en-US", etOptions));
 
   // Format with timezone offset
   const offset = etDate.getTimezoneOffset();
-  const offsetHours = Math.abs(Math.floor(offset / 60)).toString().padStart(2, '0');
-  const offsetMinutes = Math.abs(offset % 60).toString().padStart(2, '0');
-  const offsetStr = `${offset <= 0 ? '+' : '-'}${offsetHours}${offsetMinutes}`;
+  const offsetHours = Math.abs(Math.floor(offset / 60))
+    .toString()
+    .padStart(2, "0");
+  const offsetMinutes = Math.abs(offset % 60)
+    .toString()
+    .padStart(2, "0");
+  const offsetStr = `${offset <= 0 ? "+" : "-"}${offsetHours}${offsetMinutes}`;
 
   const isoWithOffset = etDate.toISOString().slice(0, -1) + offsetStr;
 
@@ -30,7 +44,7 @@ function makeTimeLogJson() {
 }
 
 function submitTime() {
-  console.log(makeTimeLogJson());
+  console.log(makeTimeLogRequestUrl());
 }
 
 function createButton() {
