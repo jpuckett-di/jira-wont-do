@@ -7,6 +7,8 @@
 // @author      Jeff Puckett
 // @version 1.0.0
 // @description Automates closing tickets as "Won't Do"
+// @homepageURL https://github.com/jpuckett-di/jira-wont-do
+// @downloadURL https://raw.githubusercontent.com/jpuckett-di/jira-wont-do/refs/heads/main/main.user.js
 // ==/UserScript==
 const COLOR_ERROR = "#d04437";
 const COLOR_SUCCESS = "#008702";
