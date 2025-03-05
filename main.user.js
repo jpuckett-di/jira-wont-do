@@ -20,23 +20,23 @@ function getTransitionsUrl() {
 
 function getAvailableTransitions() {
   return fetch(getTransitionsUrl(), {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Accept': 'application/json'
-    }
+      Accept: "application/json",
+    },
   })
-    .then(response => {
+    .then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
-    .then(data => {
-      console.log('Available transitions:', data.transitions);
+    .then((data) => {
+      console.log("Available transitions:", data.transitions);
       return data.transitions;
     })
-    .catch(error => {
-      console.error('Error fetching transitions:', error);
+    .catch((error) => {
+      console.error("Error fetching transitions:", error);
     });
 }
 
@@ -70,7 +70,7 @@ function makeTimeLogJson() {
 }
 
 function submitTime() {
-  fetch(makeTimeLogRequestUrl(), {
+  return fetch(makeTimeLogRequestUrl(), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -86,9 +86,60 @@ function submitTime() {
     })
     .then((data) => {
       console.log("Time logged successfully:", data);
+      return data; // Return data to continue the promise chain
     })
     .catch((error) => {
       console.error("Error logging time:", error);
+      throw error; // Re-throw to propagate the error to the next catch
+    });
+}
+
+function transitionToWontDo() {
+  // First log time, then transition after it completes
+  submitTime()
+    .then(() => getAvailableTransitions())
+    .then((transitions) => {
+      // Look for transition that indicates closing or resolving the issue
+      const closeTransition = transitions.find(
+        (t) =>
+          t.name.toLowerCase().includes("close") ||
+          t.name.toLowerCase().includes("resolve") ||
+          t.name.toLowerCase().includes("done")
+      );
+
+      if (!closeTransition) {
+        throw new Error(
+          "Could not find an appropriate transition to close this issue"
+        );
+      }
+
+      // Make the transition request
+      return fetch(getTransitionsUrl(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          transition: {
+            id: closeTransition.id,
+          },
+          fields: {
+            resolution: {
+              name: "Won't Do",
+            },
+          },
+        }),
+      });
+    })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      console.log(`Issue transitioned to Won't Do successfully`);
+    })
+    .catch((error) => {
+      console.error("Error in Won't Do process:", error);
     });
 }
 
@@ -102,7 +153,7 @@ function createButton() {
   button.style.backgroundColor = "#d04437";
   button.style.color = "#ffffff";
   button.style.cursor = "pointer";
-  button.onclick = getAvailableTransitions;
+  button.onclick = transitionToWontDo;
   document.body.prepend(button);
 }
 
