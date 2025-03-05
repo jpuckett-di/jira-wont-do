@@ -14,6 +14,32 @@ function findIssueKey() {
   ).innerText;
 }
 
+function getTransitionsUrl() {
+  return `https://carscommerce.atlassian.net/rest/api/3/issue/${findIssueKey()}/transitions`;
+}
+
+function getAvailableTransitions() {
+  return fetch(getTransitionsUrl(), {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json'
+    }
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Available transitions:', data.transitions);
+      return data.transitions;
+    })
+    .catch(error => {
+      console.error('Error fetching transitions:', error);
+    });
+}
+
 function makeTimeLogRequestUrl() {
   return `https://carscommerce.atlassian.net/rest/internal/3/issue/${findIssueKey()}/worklog?adjustEstimate=auto`;
 }
@@ -76,7 +102,7 @@ function createButton() {
   button.style.backgroundColor = "#d04437";
   button.style.color = "#ffffff";
   button.style.cursor = "pointer";
-  button.onclick = submitTime;
+  button.onclick = getAvailableTransitions;
   document.body.prepend(button);
 }
 
